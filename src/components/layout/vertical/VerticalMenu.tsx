@@ -19,6 +19,7 @@ import StyledVerticalNavExpandIcon from '@menu/styles/vertical/StyledVerticalNav
 // Style Imports
 import menuItemStyles from '@core/styles/vertical/menuItemStyles'
 import menuSectionStyles from '@core/styles/vertical/menuSectionStyles'
+import { GenerateVerticalMenu } from '@/components/GenerateMenu'
 
 type RenderExpandIconProps = {
   open?: boolean
@@ -69,10 +70,13 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
       >
         <MenuItem href='/home' icon={<i className='tabler-smart-home' />}>
-          Home
+          خانه
         </MenuItem>
         <MenuItem href='/about' icon={<i className='tabler-info-circle' />}>
           About
+        </MenuItem>
+           <MenuItem href='/ag-grid' icon={<i className='tabler-info-circle' />}>
+          جدول حسابداری
         </MenuItem>
       </Menu>
       {/* <Menu

@@ -218,3 +218,50 @@ code {
   background-color: rgb(var(--mui-palette-info-mainChannel) / 0.08);
   border: 0;
 }
+
+
+/* خطوط بین ستون‌ها و ردیف‌ها */
+.ag-theme-alpine .ag-cell {
+  border-right: 1px solid #d1d5db; /* خطوط عمودی */
+  border-bottom: 1px solid #d1d5db; /* خطوط افقی */
+}
+
+/* خطوط ردیف آخر */
+.ag-theme-alpine .ag-row:last-child .ag-cell {
+  border-bottom: 1px solid #d1d5db;
+}
+
+/* خطوط ستون آخر */
+.ag-theme-alpine .ag-cell:last-child {
+  border-right: 1px solid #d1d5db;
+}
+
+
+/* -------------------------- */
+
+/* .ag-autocomplete {
+  width: 300px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  padding: 4px;
+  z-index: 1000;
+}
+
+.ag-autocomplete-list {
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.ag-autocomplete-list li {
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+.ag-autocomplete-list li.active {
+  background: #e6f0ff;
+}
+ */
+

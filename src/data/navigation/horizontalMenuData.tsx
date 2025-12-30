@@ -11,7 +11,8 @@ const horizontalMenuData = (): HorizontalMenuDataType[] => [
     label: 'About',
     href: '/about',
     icon: 'tabler-info-circle'
-  }
+  },
+
 ]
 
 export default horizontalMenuData
