@@ -6,7 +6,7 @@ export const accountColumn = (): ColDef => ({
   field: 'account',
   editable: true,
   cellEditor: AccountAutocompleteEditor,
-  cellEditorPopup: true,   
+ // cellEditorPopup: true,   
   valueFormatter: params => params.value?.title ?? '',
 
   valueSetter: params => {

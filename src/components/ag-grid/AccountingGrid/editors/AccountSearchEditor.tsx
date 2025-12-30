@@ -23,14 +23,12 @@ const DynamicAsyncSelectEditor = forwardRef((props: ICellEditorParams, ref) => {
   }
 
 
-  const cellHeight = props.eGridCell?.offsetHeight ?? 32;
-
   return (
     <div
       ref={wrapperRef}
       style={{
         width: '100%', // ✅ کلیدی
-        minWidth: props.eGridCell?.offsetWidth // ✅ هم‌عرض سلول
+       // minWidth: props.eGridCell?.offsetWidth // ✅ هم‌عرض سلول
       }}
     >
       <AsyncSelect
@@ -47,26 +45,12 @@ const DynamicAsyncSelectEditor = forwardRef((props: ICellEditorParams, ref) => {
         }}
         menuPortalTarget={document.body}
         menuPosition='fixed'
-styles={{
-  control: base => ({
-    ...base,
-    backgroundColor: '#fff',       // جدا از متن سلول
-    border: '1px solid #cfd4dc',  
-    boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-    minHeight: cellHeight,          // ثابت
-    height: cellHeight              // مهم: جلوگیری از افزایش ارتفاع
-  }),
-  valueContainer: base => ({
-    ...base,
-    padding: '0 8px'
-  }),
-  indicatorSeparator: () => ({ display: 'none' }),
-  dropdownIndicator: () => ({ display: 'none' }),
-  menuPortal: base => ({
-    ...base,
-    zIndex: 999999
-  })
-}}
+        styles={{
+          menuPortal: base => ({
+            ...base,
+            zIndex: 999999
+          })
+        }}
         placeholder='جستجو حساب...'
         isClearable
       />
