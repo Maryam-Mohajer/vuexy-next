@@ -219,7 +219,6 @@ code {
   border: 0;
 }
 
-
 /* خطوط بین ستون‌ها و ردیف‌ها */
 .ag-theme-alpine .ag-cell {
   border-right: 1px solid #d1d5db; /* خطوط عمودی */
@@ -236,6 +235,23 @@ code {
   border-right: 1px solid #d1d5db;
 }
 
+/* این کد تمام رنگ های انتخاب پیش‌فرض AG Grid را غیرفعال می‌کند */
+.ag-theme-alpine .ag-row.ag-row-selected,
+.ag-theme-alpine .ag-row.ag-row-selected.ag-row-focus {
+  background-color: #ffe4b3 !important; /* رنگ دلخواه */
+  color: #000 !important;
+}
+
+/* اگر میخواید هنگام hover هم رنگ انتخاب حفظ شود */
+.ag-theme-alpine .ag-row.ag-row-hover.ag-row-selected {
+  background-color: #ffe4b3 !important;
+  color: #000 !important;
+}
+
+.ag-center-cols-clipper {
+  min-height: unset !important;
+  height: auto !important;
+}
 
 /* -------------------------- */
 
@@ -264,4 +280,3 @@ code {
   background: #e6f0ff;
 }
  */
-

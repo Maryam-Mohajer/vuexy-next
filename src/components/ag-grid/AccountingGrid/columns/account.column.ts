@@ -5,8 +5,9 @@ export const accountColumn = (): ColDef => ({
   headerName: 'حساب',
   field: 'account',
   editable: true,
+  cellEditorPopup: true,
+  cellEditorPopupPosition: 'over',
   cellEditor: AccountAutocompleteEditor,
- // cellEditorPopup: true,   
   valueFormatter: params => params.value?.title ?? '',
 
   valueSetter: params => {

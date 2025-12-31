@@ -1,41 +1,86 @@
-import { forwardRef, useRef } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import { ICellEditorParams } from 'ag-grid-community'
-import AsyncSelect from 'react-select/async'
+import Select from 'react-select'
 
-interface Option {
-  id: string
+interface ApiOption {
+  id: number
   title: string
 }
 
-const DynamicAsyncSelectEditor = forwardRef((props: ICellEditorParams, ref) => {
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  // تابع async برای بارگذاری گزینه‌ها
-  const loadOptions = async (inputValue: string) => {
-    if (!inputValue) return []
-    try {
-      const res = await fetch(`/api/accounts?search=${inputValue}`)
-      const data: Option[] = await res.json()
-      return data.map(opt => ({ value: opt.id, label: opt.title }))
-    } catch (err) {
-      console.error(err)
-      return []
+interface SelectOption {
+  value: number
+  label: string
+}
+
+const PAGE_SIZE = 5
+
+const DynamicAsyncSelectEditor = (props: ICellEditorParams) => {
+  const [inputValue, setInputValue] = useState('')
+
+  const pageRef = useRef(1)
+  const hasMoreRef = useRef(true)
+  const searchRef = useRef('')
+
+  const [options, setOptions] = useState<SelectOption[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const fetchPage = async (search: string, page: number) => {
+    const res = await fetch(`/api/accounts?search=${search}&page=${page}&pageSize=${PAGE_SIZE}`)
+    const json = await res.json()
+
+    return {
+      options: json.data.map((item: ApiOption) => ({
+        value: item.id,
+        label: item.title
+      })),
+      hasMore: json.hasMore
     }
   }
 
+  const handleInputChange = (value: string) => {
+    setInputValue(value)
+    pageRef.current = 1
+    hasMoreRef.current = true
+    setOptions([])
+  }
+
+  useEffect(() => {
+    if (!inputValue) return
+
+    const fetchData = async () => {
+      setLoading(true)
+      const result = await fetchPage(inputValue, 1)
+      setOptions(result.options)
+      hasMoreRef.current = result.hasMore
+      setLoading(false)
+    }
+
+    fetchData()
+  }, [inputValue])
+
+  const loadMore = useCallback(async () => {
+    if (loading || !hasMoreRef.current) return
+
+    setLoading(true)
+    const nextPage = pageRef.current + 1
+    const result = await fetchPage(searchRef.current, nextPage)
+
+    pageRef.current = nextPage
+    hasMoreRef.current = result.hasMore
+
+    setOptions(prev => [...prev, ...result.options])
+    setLoading(false)
+  }, [loading])
 
   return (
-    <div
-      ref={wrapperRef}
-      style={{
-        width: '100%', // ✅ کلیدی
-       // minWidth: props.eGridCell?.offsetWidth // ✅ هم‌عرض سلول
-      }}
-    >
-      <AsyncSelect
+    <div style={{ width: props.eGridCell?.offsetWidth ?? 300 }}>
+      <Select
         autoFocus
-        cacheOptions
-        defaultOptions
-        loadOptions={loadOptions}
+        options={options}
+        onInputChange={handleInputChange}
+        onMenuScrollToBottom={loadMore}
+        isLoading={loading}
+        maxMenuHeight={200}
         value={props.value ? { value: props.value.id, label: props.value.title } : null}
         onChange={(selected: any) => {
           if (selected) {
@@ -43,22 +88,181 @@ const DynamicAsyncSelectEditor = forwardRef((props: ICellEditorParams, ref) => {
             props.api.stopEditing()
           }
         }}
-        menuPortalTarget={document.body}
-        menuPosition='fixed'
-        styles={{
-          menuPortal: base => ({
-            ...base,
-            zIndex: 999999
-          })
-        }}
+        onBlur={() => props.api.stopEditing()}
         placeholder='جستجو حساب...'
-        isClearable
+        noOptionsMessage={() => (loading ? 'در حال بارگذاری...' : 'موردی یافت نشد')}
       />
     </div>
   )
-})
+}
 
 export default DynamicAsyncSelectEditor
+//--------------------------------------------------------------------------------------------------------------------------------
+
+// import { useRef, useState, useCallback } from 'react'
+// import { ICellEditorParams } from 'ag-grid-community'
+// import AsyncSelect from 'react-select/async'
+
+// interface ApiOption {
+//   id: string
+//   title: string
+// }
+
+// interface SelectOption {
+//   value: number
+//   label: string
+// }
+
+// const PAGE_SIZE = 5
+
+// const DynamicAsyncSelectEditor = (props: ICellEditorParams) => {
+//   const pageRef = useRef(1)
+//   const hasMoreRef = useRef(true)
+//   const searchRef = useRef('')
+
+//   const [options, setOptions] = useState<SelectOption[]>([])
+//   const [loading, setLoading] = useState(false)
+
+//   // 🔹 fetch یک صفحه
+//   const fetchPage = async (search: string, page: number) => {
+//     const res = await fetch(`/api/accounts?search=${search}&page=${page}&pageSize=${PAGE_SIZE}`)
+//     const json = await res.json()
+
+//     return {
+//       options: json.data.map((item: ApiOption) => ({
+//         value: item.id,
+//         label: item.title
+//       })),
+//       hasMore: json.hasMore
+//     }
+//   }
+
+//   // 🔹 سرچ جدید
+//   const loadOptions = async (inputValue: string) => {
+//     searchRef.current = inputValue
+//     pageRef.current = 1
+//     hasMoreRef.current = true
+
+//     if (!inputValue) {
+//       setOptions([])
+//       return []
+//     }
+
+//     setLoading(true)
+
+//     const result = await fetchPage(inputValue, 1)
+
+//     setOptions(result.options)
+//     hasMoreRef.current = result.hasMore
+
+//     setLoading(false)
+
+//     return result.options
+//   }
+
+//   // 🔹 اسکرول به انتها
+//   const loadMore = useCallback(async () => {
+//     if (loading || !hasMoreRef.current) return
+
+//     setLoading(true)
+
+//     const nextPage = pageRef.current + 1
+//     const result = await fetchPage(searchRef.current, nextPage)
+
+//     pageRef.current = nextPage
+//     hasMoreRef.current = result.hasMore
+
+//     setOptions(prev => [...prev, ...result.options])
+
+//     setLoading(false)
+//   }, [loading])
+
+//   return (
+//     <div style={{ width: props.eGridCell?.offsetWidth ?? 300 }}>
+//       <AsyncSelect
+//         autoFocus
+//         cacheOptions={false}
+//         defaultOptions={false}
+//         loadOptions={loadOptions}
+//         options={options}
+//         onMenuScrollToBottom={loadMore}
+//         isLoading={loading}
+//         menuPlacement='auto'
+//         maxMenuHeight={200} // ✅ خیلی مهم
+//         styles={{
+//           menuList: base => ({
+//             ...base,
+//             maxHeight: 200,
+//             overflowY: 'auto'
+//           })
+//         }}
+//         value={props.value ? { value: props.value.id, label: props.value.title } : null}
+//         onChange={(selected: any) => {
+//           if (selected) {
+//             props.node.setDataValue(props.colDef.field!, { id: selected.value, title: selected.label })
+//             props.api.stopEditing()
+//           }
+//         }}
+//         onBlur={() => props.api.stopEditing()}
+//         placeholder='جستجو حساب...'
+//         noOptionsMessage={() => (loading ? 'در حال بارگذاری...' : 'موردی یافت نشد')}
+//       />
+//     </div>
+//   )
+// }
+
+// export default DynamicAsyncSelectEditor
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+// import { forwardRef } from 'react'
+// import { ICellEditorParams } from 'ag-grid-community'
+// import AsyncSelect from 'react-select/async'
+
+// interface Option {
+//   id: string
+//   title: string
+// }
+
+// const DynamicAsyncSelectEditor = forwardRef((props: ICellEditorParams, ref) => {
+//   const loadOptions = async (inputValue: string) => {
+//     if (!inputValue) return []
+//     try {
+//       const res = await fetch(`/api/accounts?search=${inputValue}`)
+//       const data: Option[] = await res.json()
+//       return data.map(opt => ({ value: opt.id, label: opt.title }))
+//     } catch (err) {
+//       console.error(err)
+//       return []
+//     }
+//   }
+
+//   return (
+//     <div
+//       style={{
+//         width: props.eGridCell?.offsetWidth ?? 300
+//       }}
+//     >
+//       <AsyncSelect
+//         autoFocus
+//         cacheOptions
+//         defaultOptions
+//         loadOptions={loadOptions}
+//         value={props.value ? { value: props.value.id, label: props.value.title } : null}
+//         onChange={(selected: any) => {
+//           if (selected) {
+//             props.node.setDataValue(props.colDef.field!, { id: selected.value, title: selected.label })
+//             props.api.stopEditing()
+//           }
+//         }}
+//         onBlur={() => props.api.stopEditing()}
+//         placeholder='جستجو حساب...'
+//       />
+//     </div>
+//   )
+// })
+
+// export default DynamicAsyncSelectEditor
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
